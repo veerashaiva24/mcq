@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Competition</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a, #333);
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      color: #fff;
+      animation: fadeIn 2s ease-out;
+    }
+
+    #startContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      animation: fadeInUp 1s forwards;
+    }
+
+    #mcqContainer {
+      display: none;
+      margin: 20px auto;
+      max-width: 600px;
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 1s forwards;
+    }
+
+    .question {
+      margin: 20px 0;
+    }
+
+    .question label {
+      display: block;
+      margin: 5px 0;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .question label:hover {
+      color: #6200ea;
+    }
+
+    input[type="radio"] {
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 12px 18px;
+      background-color: #6200ea;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1.1em;
+      margin-top: 20px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #3700b3;
+      transform: scale(1.05);
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 5px;
+      margin: 15px 0;
+      width: 250px;
+      background-color: #333;
+      color: white;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+
+    input[type="text"]:focus {
+      background-color: #444;
+      outline: none;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>MCQ Competition</h1>
+    <div id="startContainer">
+      <input type="text" id="teamName" placeholder="Enter Team Name" required>
+      <button id="startButton">Start Competition</button>
+    </div>
+    <div id="mcqContainer">
+      <form id="mcqForm">
+        <div id="questionsContainer"></div>
+        <button type="submit" id="submitButton" disabled>Submit Answers</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAeoU_OPX3KdsAZ91xU48lAc7s4THG_Vc",
+      authDomain: "competition-registration-2024.firebaseapp.com",
+      databaseURL: "https://competition-registration-2024-default-rtdb.firebaseio.com",
+      projectId: "competition-registration-2024",
+      storageBucket: "competition-registration-2024.appspot.com",
+      messagingSenderId: "800245784389",
+      appId: "1:800245784389:web:0fd81d8cafe18ccf35282c"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const answerKey = {
+      1: 'A',
+      2: 'B',
+      3: 'C',
+      4: 'D',
+      5: 'A'
+    };
+
+    const startContainer = document.getElementById('startContainer');
+    const mcqContainer = document.getElementById('mcqContainer');
+    const form = document.getElementById('mcqForm');
+    const teamNameInput = document.getElementById('teamName');
+    const questionsContainer = document.getElementById('questionsContainer');
+    const startButton = document.getElementById('startButton');
+    const submitButton = document.getElementById('submitButton');
+
+    let startTime;
+
+    function formatTime(milliseconds) {
+      const seconds = Math.floor(milliseconds / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+      const formattedSeconds = remainingSeconds < 10 ? `0${remainingSeconds}` : `${remainingSeconds}`;
+      return `${formattedMinutes}:${formattedSeconds}`;
+    }
+
+    startButton.addEventListener('click', async () => {
+      const teamName = teamNameInput.value.trim();
+
+      if (!teamName) {
+        alert('Please enter a team name.');
+        return;
+      }
+
+      const teamRef = db.collection('mcqResults').doc(teamName);
+      const doc = await teamRef.get();
+
+      if (doc.exists) {
+        alert('Team name already exists.');
+        return;
+      }
+
+      startContainer.style.display = 'none';
+      mcqContainer.style.display = 'block';
+      generateQuestions();
+    });
+
+    function generateQuestions() {
+      const numberOfQuestions = Object.keys(answerKey).length;
+      questionsContainer.innerHTML = '';
+      for (let i = 1; i <= numberOfQuestions; i++) {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question';
+        questionDiv.innerHTML = `
+          <p>Question ${i}</p>
+          <label><input type="radio" name="question${i}" value="A"> A</label>
+          <label><input type="radio" name="question${i}" value="B"> B</label>
+          <label><input type="radio" name="question${i}" value="C"> C</label>
+          <label><input type="radio" name="question${i}" value="D"> D</label>
+        `;
+        questionsContainer.appendChild(questionDiv);
+      }
+      submitButton.disabled = false;
+      startTime = Date.now();
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const teamName = teamNameInput.value.trim();
+      const answers = {};
+      let correctAnswers = 0;
+
+      Object.keys(answerKey).forEach((key) => {
+        const answer = form[`question${key}`]?.value;
+        answers[key] = answer || 'Not Answered';
+        if (answer === answerKey[key]) {
+          correctAnswers++;
+        }
+      });
+
+      const endTime = Date.now();
+      const timeTaken = endTime - startTime;
+      const formattedTime = formatTime(timeTaken);
+
+      try {
+        await db.collection('mcqResults').doc(teamName).set({
+          teamName,
+          answers,
+          correctAnswers,
+          timeTaken: formattedTime,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Answers submitted successfully!');
+        form.reset();
+        questionsContainer.innerHTML = '';
+        mcqContainer.style.display = 'none';
+        startContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error saving data:', error);
+        alert('Failed to save data. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
