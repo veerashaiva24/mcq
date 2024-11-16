@@ -6,120 +6,119 @@
   <title>MCQ Competition</title>
   <style>
     body {
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(135deg, #1a1a1a, #333);
-  color: white;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh; /* Allow body to grow beyond 100vh */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow-y: auto; /* Allow vertical scrolling */
-}
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a, #333);
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+    }
 
-h1 {
-  font-size: 3em;
-  margin-bottom: 20px;
-  color: #fff;
-  animation: fadeIn 2s ease-out;
-}
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      color: #fff;
+      animation: fadeIn 2s ease-out;
+    }
 
-#startContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  opacity: 0;
-  animation: fadeInUp 1s forwards;
-}
+    #startContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      animation: fadeInUp 1s forwards;
+    }
 
-#mcqContainer {
-  display: none;
-  margin: 20px auto;
-  max-width: 600px;
-  background: #1e1e1e;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  animation: fadeInUp 1s forwards;
-}
+    #mcqContainer {
+      display: none;
+      margin: 20px auto;
+      max-width: 600px;
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 1s forwards;
+    }
 
-.question {
-  margin: 20px 0;
-}
+    .question {
+      margin: 20px 0;
+    }
 
-.question label {
-  display: block;
-  margin: 5px 0;
-  font-size: 1.1em;
-  cursor: pointer;
-  transition: 0.3s;
-}
+    .question label {
+      display: block;
+      margin: 5px 0;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: 0.3s;
+    }
 
-.question label:hover {
-  color: #6200ea;
-}
+    .question label:hover {
+      color: #6200ea;
+    }
 
-input[type="radio"] {
-  margin-right: 10px;
-}
+    input[type="radio"] {
+      margin-right: 10px;
+    }
 
-button {
-  padding: 12px 18px;
-  background-color: #6200ea;
-  color: white;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  font-size: 1.1em;
-  margin-top: 20px;
-  transition: background-color 0.3s, transform 0.2s;
-}
+    button {
+      padding: 12px 18px;
+      background-color: #6200ea;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1.1em;
+      margin-top: 20px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
 
-button:hover {
-  background-color: #3700b3;
-  transform: scale(1.05);
-}
+    button:hover {
+      background-color: #3700b3;
+      transform: scale(1.05);
+    }
 
-input[type="text"] {
-  padding: 10px;
-  font-size: 1.2em;
-  border: none;
-  border-radius: 5px;
-  margin: 15px 0;
-  width: 250px;
-  background-color: #333;
-  color: white;
-  text-align: center;
-  transition: background-color 0.3s;
-}
+    input[type="text"] {
+      padding: 10px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 5px;
+      margin: 15px 0;
+      width: 250px;
+      background-color: #333;
+      color: white;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
 
-input[type="text"]:focus {
-  background-color: #444;
-  outline: none;
-}
+    input[type="text"]:focus {
+      background-color: #444;
+      outline: none;
+    }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body>
@@ -158,7 +157,12 @@ input[type="text"]:focus {
       2: 'B',
       3: 'C',
       4: 'D',
-      5: 'A'
+      5: 'A',
+      6: 'A',
+      7: 'B',
+      8: 'C',
+      9: 'D',
+      10: 'A'
     };
 
     const startContainer = document.getElementById('startContainer');
@@ -188,17 +192,29 @@ input[type="text"]:focus {
         return;
       }
 
-      const teamRef = db.collection('mcqResults').doc(teamName);
-      const doc = await teamRef.get();
+      try {
+        const teamDoc = await db.collection('teams').doc(teamName).get();
 
-      if (doc.exists) {
-        alert('Team name already exists.');
-        return;
+        if (!teamDoc.exists) {
+          alert('Invalid team name. Please make sure your team is registered.');
+          return;
+        }
+
+        const teamRef = db.collection('mcqResults').doc(teamName);
+        const doc = await teamRef.get();
+
+        if (doc.exists) {
+          alert('Team name already exists in the competition.');
+          return;
+        }
+
+        startContainer.style.display = 'none';
+        mcqContainer.style.display = 'block';
+        generateQuestions();
+      } catch (error) {
+        console.error('Error validating team name:', error);
+        alert('An error occurred while validating the team name. Please try again.');
       }
-
-      startContainer.style.display = 'none';
-      mcqContainer.style.display = 'block';
-      generateQuestions();
     });
 
     function generateQuestions() {
